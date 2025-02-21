@@ -1,3 +1,9 @@
+/**
+ * Main Server Configuration File
+ * This file sets up the Express server, Socket.IO, and Google Cloud Speech-to-Text
+ * for the CareAnywhere healthcare platform.
+ */
+
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
@@ -11,11 +17,11 @@ import bodyParser from 'body-parser';
 import { SpeechClient } from '@google-cloud/speech';
 import ss from 'socket.io-stream';
 
-// Get the directory path
+// Initialize directory paths for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Configure dotenv with the absolute path to .env
+// Load environment variables
 dotenv.config({ path: join(__dirname, '.env') });
 
 // Verify environment variables are loaded
@@ -27,31 +33,10 @@ console.log('Environment variables loaded:', {
 // Connect to MongoDB
 connectDB();
 
-const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-  },
-});
-
-const PORT = 3000;
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: true }));
-
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-
-app.use('/', mainRoutes);
-
-// Med-Connect
-const rooms = {};
-const users = {};
-
+// Configure Speech-to-Text Client
 const speechClient = new SpeechClient();
 
+// Speech recognition configuration
 const recognitionConfig = {
   encoding: 'WEBM_OPUS',
   sampleRateHertz: 48000,
@@ -60,7 +45,41 @@ const recognitionConfig = {
   model: 'default'
 };
 
+// Initialize Express app and create HTTP server
+const app = express();
+const server = createServer(app);
+
+// Configure Socket.IO with CORS
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+});
+
+const PORT = process.env.PORT || 3000;
+
+// Middleware setup
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: true }));
+app.use(express.static('public'));
+
+// View engine setup
+app.set('view engine', 'ejs');
+
+// Routes
+app.use('/', mainRoutes);
+
+// Store room and user information
+const rooms = {};
+const users = {};
+
+/**
+ * Socket.IO Event Handlers
+ * Manages real-time communication for video consultations
+ */
 io.on('connection', socket => {
+  // Handle user joining a room
   socket.on('join-room', ({ name, room }) => {
     console.log('New User', name, 'joining room', room);
 
@@ -90,11 +109,13 @@ io.on('connection', socket => {
     });
   });
 
+  // Handle WebRTC signaling
   socket.on('signal', ({ data, room }) => {
     console.log('Signal received for room:', room);
     socket.broadcast.to(room).emit('signal', data);
   });
 
+  // Handle chat messages
   socket.on('send', ({ message, room }) => {
     const user = users[socket.id];
     if (user) {
@@ -105,6 +126,7 @@ io.on('connection', socket => {
     }
   });
 
+  // Handle audio streaming for transcription
   ss(socket).on('audio-stream', (stream, data) => {
     const room = users[socket.id]?.room;
     if (!room) return;
@@ -134,8 +156,12 @@ io.on('connection', socket => {
     });
   });
 
+  /**
+   * Speech-to-Text Transcription Handlers
+   */
   let recognizeStream = null;
 
+  // Start transcription session
   socket.on('startTranscription', () => {
     const request = {
       config: recognitionConfig,
@@ -159,6 +185,7 @@ io.on('connection', socket => {
       });
   });
 
+  // Process audio data
   socket.on('audioData', (data) => {
     if (recognizeStream) {
       try {
@@ -169,6 +196,7 @@ io.on('connection', socket => {
     }
   });
 
+  // End transcription session
   socket.on('endTranscription', () => {
     if (recognizeStream) {
       recognizeStream.end();
@@ -176,6 +204,7 @@ io.on('connection', socket => {
     }
   });
 
+  // Handle disconnections
   socket.on('disconnect', () => {
     const user = users[socket.id];
     if (user) {
@@ -200,6 +229,21 @@ io.on('connection', socket => {
   });
 });
 
+// Start server
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+/**
+ * Error Handling
+ */
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Promise Rejection:', err);
+  // Prevent server crash but log the error
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Log error and gracefully shutdown
+  process.exit(1);
 });
