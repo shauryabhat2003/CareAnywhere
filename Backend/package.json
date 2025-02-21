@@ -8,6 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google-cloud/speech": "^6.7.0",
     "@googlemaps/js-api-loader": "^1.16.2",
     "axios": "^1.6.0",
     "body-parser": "^1.20.2",
@@ -16,12 +17,17 @@
     "ds": "^1.4.2",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
+    "express-fileupload": "^1.5.1",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
     "mongodb": "^6.2.0",
+    "mongoose": "^8.10.1",
     "nedb": "^1.8.0",
     "node-fetch": "^3.3.2",
-    "socket.io": "^4.7.2"
+    "simple-peer": "^9.11.1",
+    "socket.io": "^4.8.1",
+    "socket.io-stream": "^0.9.1",
+    "stripe": "^17.6.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"

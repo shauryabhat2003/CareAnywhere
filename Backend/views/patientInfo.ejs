@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Records</title>
+    <link rel="stylesheet" type="text/css" href="/styles/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dela+Gothic+One&family=Pacifico&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <%- include('partials/Navbar.ejs') %>
+
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="patient-records-card">
+                        <div class="card-header bg-custom text-white">
+                            <h3 class="mb-0" style="font-weight: 700;">Patient Medical Records</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="patientForm" class="needs-validation" novalidate>
+                                <div class="row g-4">
+                                    <!-- Personal Information -->
+                                    <div class="col-12">
+                                        <h4 class="section-title">Personal Information</h4>
+                                        <hr class="section-divider">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="patientName"
+                                                placeholder="Full Name" required>
+                                            <label for="patientName">Full Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="date" class="form-control" id="dob" required>
+                                            <label for="dob">Date of Birth</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Medical History -->
+                                    <div class="col-12">
+                                        <h4 class="section-title mt-4">Medical History</h4>
+                                        <hr class="section-divider">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="medicalConditions" style="height: 100px"
+                                                placeholder="Medical Conditions"></textarea>
+                                            <label for="medicalConditions">Existing Medical Conditions</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="allergies" style="height: 100px"
+                                                placeholder="Allergies"></textarea>
+                                            <label for="allergies">Allergies & Reactions</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Current Medications -->
+                                    <div class="col-12">
+                                        <h4 class="section-title mt-4">Current Medications</h4>
+                                        <hr class="section-divider">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="medications" style="height: 100px"
+                                                placeholder="Current Medications"></textarea>
+                                            <label for="medications">List Current Medications</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="col-12 text-center mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                                            <i class="fas fa-save me-2"></i>Save Records
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Records Display -->
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="patient-records-card mt-4">
+                        <div class="card-header bg-custom text-white">
+                            <h3 class="mb-0">Previous Medical Records</h3>
+                        </div>
+                        <div class="card-body" id="previousRecords">
+                            <!-- Records will be loaded here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('partials/Footer.ejs') %>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.getElementById('patientForm');
+                    const previousRecords = document.getElementById('previousRecords');
+
+                    // Load existing records from localStorage
+                    loadPreviousRecords();
+
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+
+                        // Get form data
+                        const record = {
+                            id: Date.now(),
+                            date: new Date().toLocaleDateString(),
+                            name: document.getElementById('patientName').value,
+                            dob: document.getElementById('dob').value,
+                            medicalConditions: document.getElementById('medicalConditions').value,
+                            allergies: document.getElementById('allergies').value,
+                            medications: document.getElementById('medications').value
+                        };
+
+                        // Save to localStorage
+                        saveRecord(record);
+
+                        // Display the new record
+                        displayRecord(record);
+
+                        // Reset form
+                        form.reset();
+                    });
+
+                    function saveRecord(record) {
+                        let records = JSON.parse(localStorage.getItem('medicalRecords') || '[]');
+                        records.unshift(record); // Add new record at the beginning
+                        localStorage.setItem('medicalRecords', JSON.stringify(records));
+                    }
+
+                    function loadPreviousRecords() {
+                        const records = JSON.parse(localStorage.getItem('medicalRecords') || '[]');
+                        previousRecords.innerHTML = ''; // Clear existing content
+                        records.forEach(record => displayRecord(record));
+                    }
+
+                    function displayRecord(record) {
+                        const recordHtml = `
+                            <div class="record-item mb-4 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0 text-primary">${record.name}</h5>
+                                    <small class="text-muted">Recorded on: ${record.date}</small>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Date of Birth:</strong> ${record.dob}</p>
+                                        <p><strong>Medical Conditions:</strong><br>${record.medicalConditions}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Allergies:</strong><br>${record.allergies}</p>
+                                        <p><strong>Current Medications:</strong><br>${record.medications}</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-danger btn-sm mt-2" onclick="deleteRecord(${record.id})">
+                                    <i class="fas fa-trash me-1"></i>Delete Record
+                                </button>
+                            </div>
+                        `;
+
+                        if (previousRecords.innerHTML === '') {
+                            previousRecords.innerHTML = recordHtml;
+                        } else {
+                            previousRecords.innerHTML = recordHtml + previousRecords.innerHTML;
+                        }
+                    }
+
+                    // Add delete functionality
+                    window.deleteRecord = function (id) {
+                        if (confirm('Are you sure you want to delete this record?')) {
+                            let records = JSON.parse(localStorage.getItem('medicalRecords') || '[]');
+                            records = records.filter(record => record.id !== id);
+                            localStorage.setItem('medicalRecords', JSON.stringify(records));
+                            loadPreviousRecords(); // Refresh the display
+                        }
+                    };
+                });
+            </script>
+</body>
+
+</html>

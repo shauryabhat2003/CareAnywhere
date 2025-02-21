@@ -1,0 +1,352 @@
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    padding-bottom: 0;
+    /* Remove padding-bottom */
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 20px auto;
+}
+
+.left-panel {
+    background: rgba(248, 249, 250, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-label {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+video {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+    aspect-ratio: 16/9;
+    border: 2px solid #007bff;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+    padding: 1rem 0;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.controls .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.message {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 80%;
+    word-break: break-word;
+}
+
+.message-left {
+    background: #e9ecef;
+    margin-right: auto;
+}
+
+.message-right {
+    background: #007bff;
+    color: white;
+    margin-left: auto;
+}
+
+.message-system {
+    background: #ffd700;
+    color: #000;
+    text-align: center;
+    margin: 8px auto;
+    max-width: 60%;
+}
+
+.message-input {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid #dee2e6;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 8px 8px;
+}
+
+.message-input input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.transcription-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.transcription {
+    height: 200px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.transcription p {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.transcription .interim {
+    color: #6c757d;
+    font-style: italic;
+    background: #e9ecef;
+}
+
+.transcription .error {
+    color: #dc3545;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.transcription #interim {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.connection-status {
+    text-align: center;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+#connectionStatus {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+#connectionStatus.connected {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+#connectionStatus.disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.room-info {
+    text-align: center;
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    margin-bottom: 2rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Add or update these navbar styles */
+.navbar {
+    background-color: #005B41 !important;
+    /* Using !important to override Bootstrap defaults */
+    margin-bottom: 0;
+    padding: 0.5rem 1rem;
+    /* Reduced vertical padding */
+}
+
+.navbar-dark {
+    background-color: #005B41;
+}
+
+.bg-custom {
+    background-color: #005B41 !important;
+}
+
+/* Update the footer styles as well for consistency */
+.footer {
+    background-color: #005B41;
+    padding: 20px;
+    color: white;
+    margin-top: auto;
+    margin-bottom: 0;
+    /* Ensure no margin at bottom */
+    border: none;
+    /* Remove any border */
+}
+
+.footer ul {
+    margin: 0;
+    /* Remove margin from footer list */
+    padding: 0;
+    /* Remove padding from footer list */
+}
+
+.container-fluid {
+    flex: 1 0 auto;
+    /* Allow container to grow but not shrink */
+    padding: 20px;
+    padding-bottom: 0;
+    /* Remove bottom padding */
+    padding-top: 10px;
+    /* Reduced from 20px */
+}
+
+/* Add or update these styles */
+.controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 15px 0;
+}
+
+.video-controls {
+    margin-bottom: 15px;
+}
+
+.call-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.call-controls button {
+    min-width: 120px;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.btn-success:hover {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Update the consultation-wrapper margin */
+.consultation-wrapper.mt-4 {
+    margin-top: 0.5rem !important;
+    /* Reduced from 1.5rem (mt-4) to 0.5rem */
+}
+
+/* Media Queries */
+@media (max-width: 992px) {
+    .video-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+    }
+}

@@ -1,35 +1,51 @@
 <!-- navbar.ejs -->
 
-
 <head>
-    <link rel="stylesheet" type="text/css" href="/public/styles/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dela+Gothic+One&family=Pacifico&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
-<nav class="navbar navbar-expand-md navbar-dark bg-custom">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/">MedFirst❤️‍🩹</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-heartbeat me-2"></i>CareAnywhere
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <!-- Changed from me-auto to ms-auto to move items to right -->
+        <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Home</a>
+            <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="/nearbyHospital">Nearby Hospitals</a>
-          </li> 
+            <a class="nav-link" href="/nearbyHospital"><i class="fas fa-hospital me-1"></i>Hospitals</a>
+          </li>
           <li class="nav-item">
-            <a class="nav-link active" href="/nearbyPharmacy">Nearby Pharmacy</a>
-          </li> 
+            <a class="nav-link" href="/nearbyPharmacy"><i class="fas fa-pills me-1"></i>Pharmacy</a>
+          </li>
           <li class="nav-item">
-            <a class="nav-link active" href="/medConnect">Med-Connect</a>
+            <a class="nav-link" href="/medConnect"><i class="fas fa-video me-1"></i>Med-Connect</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/patientInfo"><i class="fas fa-file-medical me-1"></i>Records</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link book-appointment" href="/payment">
+              <i class="fas fa-calendar-check me-1"></i>Book Appointment
+            </a>
           </li>
         </ul>
-
       </div>
     </div>
   </nav>
- 
+
 
   <script src="/server.js"></script>
+</body>
