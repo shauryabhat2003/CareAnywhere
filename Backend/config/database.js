@@ -5,13 +5,12 @@ dotenv.config();
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/careAnywhere', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        // Remove deprecated options and use proper connection string
+        const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/careAnywhere');
+
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
-        console.error('Error connecting to MongoDB:', error.message);
+        console.error('MongoDB Connection Error:', error.message);
         process.exit(1);
     }
 };
