@@ -1,6 +1,12 @@
 // public/scripts/medConnect.js
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = io('http://localhost:3000');
+    const socket = io({
+        transports: ['websocket', 'polling'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 60000,
+    });
+
     let peer = null;
     let localStream = null;
     let isInitiator = false;
@@ -38,9 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function startCall() {
         try {
-            localStream = await navigator.mediaDevices.getUserMedia({ 
-                video: true, 
-                audio: true 
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
             });
             localVideo.srcObject = localStream;
 
@@ -265,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('transcription', ({ text, isFinal }) => {
         const transcriptionDiv = document.getElementById('transcription');
-        
+
         if (isFinal) {
             // Remove any existing interim text
             const interim = document.getElementById('interim');
@@ -297,4 +303,37 @@ document.addEventListener('DOMContentLoaded', () => {
         errorP.textContent = `Error: ${error}`;
         transcriptionDiv.appendChild(errorP);
     });
+
+    // Add connection event handlers
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+        handleConnectionError();
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log('Disconnected:', reason);
+        handleDisconnect();
+    });
+
+    function handleConnectionError() {
+        const errorDiv = document.getElementById('connectionError') || createErrorDiv();
+        errorDiv.textContent = 'Connection failed. Attempting to reconnect...';
+    }
+
+    function handleDisconnect() {
+        const errorDiv = document.getElementById('connectionError') || createErrorDiv();
+        errorDiv.textContent = 'Disconnected from server. Reconnecting...';
+    }
+
+    function createErrorDiv() {
+        const div = document.createElement('div');
+        div.id = 'connectionError';
+        div.className = 'alert alert-warning';
+        document.body.insertBefore(div, document.body.firstChild);
+        return div;
+    }
 });

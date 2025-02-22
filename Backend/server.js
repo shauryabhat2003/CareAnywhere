@@ -49,11 +49,24 @@ const recognitionConfig = {
 const app = express();
 const server = createServer(app);
 
-// Configure Socket.IO with CORS
+// Configure Socket.IO with proper CORS and error handling
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: process.env.NODE_ENV === 'production'
+      ? 'https://careanywhere.onrender.com'
+      : 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true
   },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  reconnection: true,
+  reconnectionAttempts: 5
+});
+
+// Error handling for Socket.IO
+io.engine.on('connection_error', (err) => {
+  console.log('Connection error:', err);
 });
 
 const PORT = process.env.PORT || 3000;
@@ -69,6 +82,10 @@ app.set('view engine', 'ejs');
 
 // Routes
 app.use('/', mainRoutes);
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', socketIO: io.engine.clientsCount });
+});
 
 // Store room and user information
 const rooms = {};
