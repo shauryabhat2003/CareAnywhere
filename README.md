@@ -1,7 +1,9 @@
 # CareAnywhere 🏥
 
 Link: https://careanywhere.onrender.com
+
 Figma: https://www.figma.com/design/W2C6hZ2jeWZdqNEqqsVO9O/PROJECT_LAYOUT?m=auto&t=V73BpDgb0CpPMPIx-6
+
 Project Demo: https://youtu.be/cQxyBxZzVvI
 
 > A modern healthcare platform connecting patients with medical services, featuring real-time translation and transcription for inclusive healthcare communication.
