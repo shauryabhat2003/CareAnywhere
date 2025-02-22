@@ -14,8 +14,8 @@ import { dirname, join } from 'path';
 import mainRoutes from './routes/index.js';
 import connectDB from './config/database.js';
 import bodyParser from 'body-parser';
-import { SpeechClient } from '@google-cloud/speech';
 import ss from 'socket.io-stream';
+import speechClient from './config/speech-to-text.js';
 
 // Initialize directory paths for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -32,9 +32,6 @@ console.log('Environment variables loaded:', {
 
 // Connect to MongoDB
 connectDB();
-
-// Configure Speech-to-Text Client
-const speechClient = new SpeechClient();
 
 // Speech recognition configuration
 const recognitionConfig = {
