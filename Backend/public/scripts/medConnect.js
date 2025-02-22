@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let mediaRecorder = null;
     let audioContext = null;
     let audioStream = null;
+    let recognizeStream = null;
 
     // DOM Elements
     const localVideo = document.getElementById('localVideo');
@@ -106,66 +107,55 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startTranscription() {
         try {
             if (!localStream) {
-                console.error('No local stream available');
-                return;
+                throw new Error('No local stream available');
             }
 
-            // Get audio track
             const audioTrack = localStream.getAudioTracks()[0];
             if (!audioTrack) {
-                console.error('No audio track found');
-                return;
+                throw new Error('No audio track found');
             }
 
-            // Create audio context and source
-            audioContext = new AudioContext();
-            const source = audioContext.createMediaStreamSource(localStream);
-            const processor = audioContext.createScriptProcessor(4096, 1, 1);
-
-            source.connect(processor);
-            processor.connect(audioContext.destination);
-
-            // Initialize MediaRecorder
+            // Create MediaRecorder with specific options
             const options = {
                 mimeType: 'audio/webm;codecs=opus',
                 audioBitsPerSecond: 48000
             };
 
-            audioStream = new MediaStream([audioTrack]);
-            mediaRecorder = new MediaRecorder(audioStream, options);
+            mediaRecorder = new MediaRecorder(new MediaStream([audioTrack]), options);
 
-            // Notify server to start transcription
+            // Reset any existing stream
+            if (recognizeStream && !recognizeStream.destroyed) {
+                recognizeStream.end();
+            }
+
+            // Notify server to start new transcription
             socket.emit('startTranscription');
 
-            // Handle audio data
             mediaRecorder.ondataavailable = async (event) => {
-                if (event.data.size > 0) {
+                if (event.data.size > 0 && socket.connected) {
                     const buffer = await event.data.arrayBuffer();
                     socket.emit('audioData', buffer);
                 }
             };
 
-            // Start recording
-            mediaRecorder.start(250); // Collect data every 250ms
+            mediaRecorder.onstop = () => {
+                socket.emit('endTranscription');
+            };
 
+            mediaRecorder.start(250);
             console.log('Transcription started');
         } catch (err) {
             console.error('Error starting transcription:', err);
+            showTranscriptionError(err.message);
         }
     }
 
     function stopTranscription() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
+        }
+        if (socket.connected) {
             socket.emit('endTranscription');
-        }
-        if (audioContext) {
-            audioContext.close();
-            audioContext = null;
-        }
-        if (audioStream) {
-            audioStream.getTracks().forEach(track => track.stop());
-            audioStream = null;
         }
     }
 
@@ -297,11 +287,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('transcriptionError', (error) => {
         console.error('Transcription error:', error);
-        const transcriptionDiv = document.getElementById('transcription');
-        const errorP = document.createElement('p');
-        errorP.className = 'error';
-        errorP.textContent = `Error: ${error}`;
-        transcriptionDiv.appendChild(errorP);
+        showTranscriptionError(error);
+    });
+
+    socket.on('disconnect', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        showTranscriptionError('Connection lost. Reconnecting...');
     });
 
     // Add connection event handlers
@@ -335,5 +328,18 @@ document.addEventListener('DOMContentLoaded', () => {
         div.className = 'alert alert-warning';
         document.body.insertBefore(div, document.body.firstChild);
         return div;
+    }
+
+    function showTranscriptionError(message) {
+        const transcriptionDiv = document.getElementById('transcription');
+        const errorElement = document.createElement('p');
+        errorElement.className = 'error-message';
+        errorElement.textContent = `Error: ${message}`;
+        transcriptionDiv.appendChild(errorElement);
+
+        // Auto-remove error message after 5 seconds
+        setTimeout(() => {
+            errorElement.remove();
+        }, 5000);
     }
 });

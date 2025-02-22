@@ -2,6 +2,7 @@
 
 Link: https://careanywhere.onrender.com
 Figma: https://www.figma.com/design/W2C6hZ2jeWZdqNEqqsVO9O/PROJECT_LAYOUT?m=auto&t=V73BpDgb0CpPMPIx-6
+Project Demo: https://youtu.be/cQxyBxZzVvI
 
 > A modern healthcare platform connecting patients with medical services, featuring real-time translation and transcription for inclusive healthcare communication.
 
@@ -53,7 +54,7 @@ Figma: https://www.figma.com/design/W2C6hZ2jeWZdqNEqqsVO9O/PROJECT_LAYOUT?m=auto
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/your-username/CareAnywhere.git
+git clone https://github.com/shauryabhat2003/CareAnywhere.git
 cd CareAnywhere
 ```
 
@@ -149,20 +150,13 @@ git push origin feature/AmazingFeature
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Team
-
-- **Developer** - [Your Name](https://github.com/yourusername)
-- **Designer** - [Designer Name](https://github.com/designerusername)
-
 ## 📬 Contact
 
-- Project Link: [https://github.com/your-username/CareAnywhere](https://github.com/your-username/CareAnywhere)
-- Website: [https://careanywhere.com](https://careanywhere.com)
+- Project Link: [https://github.com/shauryabhat2003/CareAnywhere](https://github.com/shauryabhat2003/CareAnywhere)
 
 ## 🙏 Acknowledgments
 
 - Google Cloud Platform
-- OpenAI
-- Bootstrap Team
+- Bootstrap
 - Font Awesome
-- MongoDB Team
+- MongoDB

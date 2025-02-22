@@ -96,6 +96,8 @@ const users = {};
  * Manages real-time communication for video consultations
  */
 io.on('connection', socket => {
+  let recognizeStream = null;
+
   // Handle user joining a room
   socket.on('join-room', ({ name, room }) => {
     console.log('New User', name, 'joining room', room);
@@ -176,39 +178,58 @@ io.on('connection', socket => {
   /**
    * Speech-to-Text Transcription Handlers
    */
-  let recognizeStream = null;
-
-  // Start transcription session
   socket.on('startTranscription', () => {
-    const request = {
-      config: recognitionConfig,
-      interimResults: true
-    };
+    try {
+      // Close existing stream if any
+      if (recognizeStream) {
+        recognizeStream.end();
+        recognizeStream = null;
+      }
 
-    recognizeStream = speechClient
-      .streamingRecognize(request)
-      .on('error', (error) => {
-        console.error('Transcription error:', error);
-        socket.emit('transcriptionError', error.message);
-      })
-      .on('data', (data) => {
-        const result = data.results[0];
-        if (result) {
-          socket.emit('transcription', {
-            text: result.alternatives[0].transcript,
-            isFinal: result.isFinal
-          });
-        }
-      });
+      const request = {
+        config: {
+          encoding: 'WEBM_OPUS',
+          sampleRateHertz: 48000,
+          languageCode: 'en-US',
+          enableAutomaticPunctuation: true
+        },
+        interimResults: true
+      };
+
+      recognizeStream = speechClient
+        .streamingRecognize(request)
+        .on('error', (error) => {
+          console.error('Transcription error:', error);
+          socket.emit('transcriptionError', error.message);
+          if (recognizeStream) {
+            recognizeStream.end();
+            recognizeStream = null;
+          }
+        })
+        .on('data', (data) => {
+          const result = data.results[0];
+          if (result && result.alternatives[0]) {
+            socket.emit('transcription', {
+              text: result.alternatives[0].transcript,
+              isFinal: result.isFinal
+            });
+          }
+        });
+
+    } catch (error) {
+      console.error('Error starting transcription:', error);
+      socket.emit('transcriptionError', error.message);
+    }
   });
 
   // Process audio data
   socket.on('audioData', (data) => {
-    if (recognizeStream) {
+    if (recognizeStream && !recognizeStream.destroyed) {
       try {
         recognizeStream.write(data);
       } catch (error) {
         console.error('Error writing to stream:', error);
+        socket.emit('transcriptionError', error.message);
       }
     }
   });
@@ -242,6 +263,10 @@ io.on('connection', socket => {
         name: user.name
       });
       delete users[socket.id];
+    }
+    if (recognizeStream) {
+      recognizeStream.end();
+      recognizeStream = null;
     }
   });
 });
