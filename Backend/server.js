@@ -93,6 +93,12 @@ const users = {};
  * Manages real-time communication for video consultations
  */
 io.on('connection', socket => {
+  socket.on('join-room', ({ id, room }) => {
+    console.log('User joining room:', { id, room });
+    socket.join(room);
+    socket.to(room).emit('user-joined', { id });
+  });
+
   let recognizeStream = null;
 
   // Handle user joining a room

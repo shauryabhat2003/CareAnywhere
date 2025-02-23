@@ -49,18 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 video: true,
                 audio: true
             });
+
             localVideo.srcObject = localStream;
+            console.log('Got media stream');
 
-            // Start transcription after getting media stream
             await startTranscription();
-
             createPeerConnection();
+
             startCallBtn.disabled = true;
             endCallBtn.disabled = false;
             updateStatus('Connecting to peer...');
         } catch (err) {
             console.error('Failed to get media devices:', err);
             updateStatus('Camera/Microphone access denied');
+            alert('Please allow camera and microphone access.');
         }
     }
 
@@ -69,38 +71,66 @@ document.addEventListener('DOMContentLoaded', () => {
             peer.destroy();
         }
 
-        peer = new SimplePeer({
-            initiator: isInitiator,
-            stream: localStream,
-            trickle: false,
+        // Initialize peer with a random ID
+        const peerId = generateRoomId();
+
+        peer = new Peer(peerId, {
+            host: '0.peerjs.com', // Using public PeerJS server
+            port: 443,
+            secure: true,
+            debug: 3,
             config: {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    {
+                        urls: 'turn:relay.metered.ca:80',
+                        username: '52ffbd51dfea25656826e630',
+                        credential: 'h/J9dKN7CMqgttLK',
+                    }
                 ]
             }
         });
 
-        peer.on('signal', data => {
-            socket.emit('signal', { data, room: currentRoom });
+        // Handle peer events
+        peer.on('open', (id) => {
+            console.log('My peer ID is: ' + id);
+            socket.emit('join-room', { id, room: currentRoom });
         });
 
-        peer.on('connect', () => {
-            updateStatus('Connected!', true);
-        });
-
-        peer.on('stream', stream => {
-            remoteVideo.srcObject = stream;
-            updateStatus('Video streaming');
-        });
-
-        peer.on('error', err => {
+        peer.on('error', (err) => {
             console.error('Peer Error:', err);
             updateStatus(`Connection error: ${err.message}`);
         });
 
-        peer.on('close', () => {
-            endCall();
+        peer.on('call', (call) => {
+            console.log('Receiving call...');
+            call.answer(localStream);
+
+            call.on('stream', (remoteStream) => {
+                console.log('Received remote stream');
+                remoteVideo.srcObject = remoteStream;
+                updateStatus('Video streaming', true);
+            });
+        });
+
+        // Handle new user joining
+        socket.on('user-joined', ({ id }) => {
+            console.log('User joined, calling them:', id);
+            if (localStream) {
+                const call = peer.call(id, localStream);
+
+                call.on('stream', (remoteStream) => {
+                    console.log('Received remote stream from call');
+                    remoteVideo.srcObject = remoteStream;
+                    updateStatus('Video streaming', true);
+                });
+
+                call.on('error', (err) => {
+                    console.error('Call error:', err);
+                    updateStatus(`Call error: ${err.message}`);
+                });
+            }
         });
     }
 
@@ -160,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateStatus(message, connected = false) {
+        console.log('Status update:', message);
         connectionStatus.textContent = message;
         connectionStatus.className = `alert ${connected ? 'alert-success' : 'alert-warning'}`;
     }
