@@ -40,7 +40,7 @@ Project Demo: https://youtu.be/cQxyBxZzVvI
   - Google Maps
   - Google Cloud Speech-to-Text
   - Stripe Payment
-- **Real-time**: WebRTC, Socket.io
+- **Real-time**: WebRTC, Socket.io, PeerJS
 
 ## 🚀 Getting Started
 
@@ -122,7 +122,6 @@ The platform supports real-time transcription for:
 - HIPAA compliant data handling
 - End-to-end encryption
 - Secure socket connections
-- JWT authentication
 - Rate limiting
 
 ## 🤝 Contributing
